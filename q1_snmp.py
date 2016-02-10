@@ -94,6 +94,7 @@ def main():
 	rtr1.snmp_user = snmp_user
 	rtr2 = device('50.76.53.27','8061')
 	rtr2.snmp_user = snmp_user
+	devices = [rtr1, rtr2]
 #	rtr1.oid = rtr1.query_get('.1.3.6.1.2.1.1.1.0')
 #	rtr1.sysDescr = rtr1.extract(rtr1.oid)
 #	rtr1.oid = rtr1.query_get('.1.3.6.1.2.1.1.5.0')
@@ -103,16 +104,13 @@ def main():
 #	print rtr1
 
 	while True:
-		rtr1.get_sysinfo()
-		rtr2.get_sysinfo()
-		if (rtr1.RunningLastChangedDelta/6000 < 5):
-			print rtr1.sysName + " changed at %s" % datetime.now()
-			message += rtr1.sysName + " changed at %s \n" % (datetime.now() - - timedelta(seconds=rtr1.RunningLastChangedDelta/100))
-		elif rtr2.RunningLastChangedDelta/6000 < 5:
-			print rtr2.RunningLastChangedDelta
-			print rtr2.sysName + " changed at %s" % (datetime.now() - timedelta(seconds=rtr2.RunningLastChangedDelta/100))
-			print "now is %s" % datetime.now()
-                        message += rtr2.sysName + " changed at %s \n" % (datetime.now() - timedelta(seconds=rtr2.RunningLastChangedDelta/100))
+		for item in devices:
+			item.get_sysinfo()
+			if item.RunningLastChangedDelta/6000 < 5:
+				print item.RunningLastChangedDelta
+				print item.sysName + " changed at %s" % (datetime.now() - timedelta(seconds=item.RunningLastChangedDelta/100))
+				print "now is %s" % datetime.now()
+	                       	message += item.sysName + " changed at %s \n" % (datetime.now() - timedelta(seconds=item.RunningLastChangedDelta/100))
 		if len(message) > 0:
 			email_helper.send_mail(recipient, subject, message, sender)
 		message = ""
